@@ -5,27 +5,32 @@ import android.os.Handler;
 import android.preference.Preference;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Window;
+import android.widget.TextView;
 
 import com.amikom.simpleapplication.util.PreferencesHelper;
 
 public class SplashScreen extends AppCompatActivity {
-    PreferencesHelper instance;
+    TextView tvSplash;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final PreferencesHelper instance;
         super.onCreate(savedInstanceState);
+
+        //menghilangkan ActionBar
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_splash_screen);
-        instance = PreferencesHelper.getInstance(getApplicationContext());
-        int splashInterval = 10;
-        new Handler().postDelayed(new Runnable() {
+
+
+
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!instance.isLogin()) {
-                    startActivity(new Intent(SplashScreen.this, LoginActivity. class));
-                } else {
-                    startActivity(new Intent(SplashScreen.this, MainActivity. class ));
-                }
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                finish();
             }
-        });
+        }, 4000L); //4000 L = 4 detik
     }
 }

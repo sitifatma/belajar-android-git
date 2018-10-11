@@ -1,44 +1,132 @@
 package com.amikom.simpleapplication.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.amikom.simpleapplication.LoginActivity;
+
 import java.security.PrivateKey;
+import java.util.HashMap;
 
 public class PreferencesHelper {
-    private static PreferencesHelper INSTANCE;
-    private SharedPreferences sharedPreferences;
+    // Shared Preferences reference
+    SharedPreferences pref;
 
-    private PreferencesHelper(Context context) {
-        sharedPreferences = context
-                .getApplicationContext()
-                .getSharedPreferences("simple.android.app" , Context.MODE_PRIVATE);
+    // Editor reference for Shared preferences
+    SharedPreferences.Editor editor;
+
+    // Context
+    Context _context;
+
+    // Shared pref mode
+    int PRIVATE_MODE = 0;
+
+    // Sharedpref file name
+    private static final String PREFER_NAME = "SitiFatmawatiPref";
+
+    // All Shared Preferences Keys
+    private static final String IS_USER_LOGIN = "IsUserLoggedIn";
+
+    // User name (make variable public to access from outside)
+    public static final String KEY_NAME = "name";
+
+    // Email address (make variable public to access from outside)
+    public static final String KEY_EMAIL = "email";
+
+    // Constructor
+    public PreferencesHelper(Context context){
+        this._context = context;
+        pref = _context.getSharedPreferences(PREFER_NAME, PRIVATE_MODE);
+        editor = pref.edit();
     }
 
-    public static PreferencesHelper getINSTANCE(Context context){
-        if (INSTANCE == null) {
-            INSTANCE = new PreferencesHelper(context);
+    //Create login session
+    public void createUserLoginSession(String name, String email){
+        // Storing login value as TRUE
+        editor.putBoolean(IS_USER_LOGIN, true);
+
+        // Storing name in pref
+        editor.putString(KEY_NAME, name);
+
+        // Storing email in pref
+        editor.putString(KEY_EMAIL, email);
+
+        // commit changes
+        editor.commit();
+    }
+
+    /**
+     * Check login method will check user login status
+     * If false it will redirect user to login page
+     * Else do anything
+     * */
+   public boolean checkLogin(){
+        // Check login status
+        if(!this.isUserLoggedIn()){
+
+            // user is not logged in redirect him to Login Activity
+            Intent i = new Intent(_context, LoginActivity.class);
+
+            // Closing all the Activities from stack
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            // Add new Flag to start new Activity
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            // Staring Login Activity
+            _context.startActivity(i);
+
+            return true;
         }
-        return INSTANCE;
+        return false;
     }
 
-    public SharedPreferences Pref(){
-        return sharedPreferences;
+
+
+    /**
+     * Get stored session data
+     * */
+    public HashMap<String, String> getUserDetails(){
+
+        //Use hashmap to store user credentials
+        HashMap<String, String> user = new HashMap<String, String>();
+
+        // user name
+        user.put(KEY_NAME, pref.getString(KEY_NAME, null));
+
+        // user email id
+        user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
+
+        // return user
+        return user;
     }
 
-    public Boolean isLogin(){
-        return  sharedPreferences.getBoolean("isLogin", false);
+    /**
+     * Clear session details
+     * */
+    public void logoutUser(){
+
+        // Clearing all user data from Shared Preferences
+        editor.clear();
+        editor.commit();
+
+        // After logout redirect user to Login Activity
+        Intent i = new Intent(_context, LoginActivity.class);
+
+        // Closing all the Activities
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Add new Flag to start new Activity
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // Staring Login Activity
+        _context.startActivity(i);
     }
 
-    public void setLogin(Boolean isCall){
-        sharedPreferences.edit().putBoolean("isLogin", isCall).apply();
-    }
 
-    public void setName (String isName){
-        sharedPreferences.edit().putString("isName", isName).apply();
-    }
+    // Check for login
+    public boolean isUserLoggedIn(){
+        return pref.getBoolean(IS_USER_LOGIN, false);
+    }}
 
-    public String getName() {
-        return sharedPreferences.getString("isName", "");
-    }
-}
